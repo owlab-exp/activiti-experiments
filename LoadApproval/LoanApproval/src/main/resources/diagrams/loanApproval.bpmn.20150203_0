@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:activiti="http://activiti.org/bpmn" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" typeLanguage="http://www.w3.org/2001/XMLSchema" expressionLanguage="http://www.w3.org/1999/XPath" targetNamespace="http://www.activiti.org/test">
+  <process id="loanApproval" name="여신승인프로세스" isExecutable="true">
+    <startEvent id="loanApprovalRequest" name="여신승인요청" activiti:initiator="aprvlDemandStaffId">
+      <extensionElements>
+        <activiti:formProperty id="aprvId" name="승인식별자" type="string"></activiti:formProperty>
+        <activiti:formProperty id="aprvlAplctnCntnt" name="승인신청내용" type="string"></activiti:formProperty>
+        <activiti:formProperty id="aprvlTp" name="승인유형" type="string"></activiti:formProperty>
+        <activiti:formProperty id="aprvlAplctnCustId" name="승인신청고객식별자" type="string"></activiti:formProperty>
+        <activiti:formProperty id="aprvlAplctnCustNm" name="승인신청고객명" type="string"></activiti:formProperty>
+        <activiti:formProperty id="pdCd" name="상품코드" type="string"></activiti:formProperty>
+        <activiti:formProperty id="pdNm" name="상품명" type="string"></activiti:formProperty>
+        <activiti:formProperty id="aprvlAplctnAmt" name="승인신청금액" type="string"></activiti:formProperty>
+        <activiti:formProperty id="aprvlAplctnLnTrm" name="승인신청대출기간" type="string"></activiti:formProperty>
+        <activiti:formProperty id="aprvlAplctnIntRt" name="승인신청이율" type="string"></activiti:formProperty>
+        <activiti:formProperty id="adjmntIntRt" name="조정이율" type="string"></activiti:formProperty>
+        <activiti:formProperty id="intRtDscntAplyTrm" name="금리할인적용기간" type="string"></activiti:formProperty>
+        <activiti:formProperty id="erlyRpymntFeeRdctnExmptnRt" name="조기상환수수료감면율" type="string"></activiti:formProperty>
+        <activiti:formProperty id="athrznTrgtSrvcCd" name="승인대상서비스코드" type="string"></activiti:formProperty>
+        <activiti:formProperty id="athrznTrgtBizIdKeyCntnt" name="승인대상업무식별키내용" type="string"></activiti:formProperty>
+      </extensionElements>
+    </startEvent>
+    <userTask id="handleLoanApprovalRequestL1" name="여신승인처리_1단계" activiti:candidateGroups="management">
+      <extensionElements>
+        <activiti:formProperty id="loanApprovedLevel1" name="여신요청을 승인하시겠습니까?" type="enum" required="true">
+          <activiti:value id="true" name="승인"></activiti:value>
+          <activiti:value id="false" name="거절"></activiti:value>
+        </activiti:formProperty>
+      </extensionElements>
+    </userTask>
+    <exclusiveGateway id="requestApprovedDecisionLevel2" name="Request approved in level 2?"></exclusiveGateway>
+    <sequenceFlow id="flow5" sourceRef="requestApprovedDecisionLevel2" targetRef="scripttask1">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${loanApprovedLevel2 == 'true'}]]></conditionExpression>
+    </sequenceFlow>
+    <endEvent id="endevent1" name="End"></endEvent>
+    <sequenceFlow id="flow7" sourceRef="scripttask1" targetRef="endevent1"></sequenceFlow>
+    <scriptTask id="scripttask1" name="여신승인후처리" scriptFormat="groovy" activiti:autoStoreVariables="false">
+      <script>out:println "Approved";</script>
+    </scriptTask>
+    <sequenceFlow id="flow9" sourceRef="loanApprovalRequest" targetRef="handleLoanApprovalRequestL1"></sequenceFlow>
+    <userTask id="handleLoanApprovalRequestL2" name="여신승인처리_2단계" activiti:candidateGroups="management">
+      <extensionElements>
+        <activiti:formProperty id="loanApprovedLevel2" name="여신요청을 승인하시겠습니까?" type="enum" required="true">
+          <activiti:value id="true" name="승인"></activiti:value>
+          <activiti:value id="false" name="거절"></activiti:value>
+        </activiti:formProperty>
+      </extensionElements>
+    </userTask>
+    <sequenceFlow id="flow11" sourceRef="handleLoanApprovalRequestL2" targetRef="requestApprovedDecisionLevel2"></sequenceFlow>
+    <exclusiveGateway id="requestApprovedDecisionLevel1" name="Request approved in level 1?"></exclusiveGateway>
+    <sequenceFlow id="flow12" sourceRef="handleLoanApprovalRequestL1" targetRef="requestApprovedDecisionLevel1"></sequenceFlow>
+    <sequenceFlow id="flow13" sourceRef="requestApprovedDecisionLevel1" targetRef="handleLoanApprovalRequestL2">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${loanApprovedLevel1 == 'true'}]]></conditionExpression>
+    </sequenceFlow>
+    <userTask id="adjustLoanApprovalRequest" name="승인요청정정" activiti:assignee="${loanApprovalRequester}">
+      <extensionElements>
+        <activiti:formProperty id="resendRequest" name="여신승인을 재요청하시렵니까?" type="enum" required="true">
+          <activiti:value id="true" name="예"></activiti:value>
+          <activiti:value id="false" name="아니오"></activiti:value>
+        </activiti:formProperty>
+      </extensionElements>
+    </userTask>
+    <sequenceFlow id="flow14" sourceRef="requestApprovedDecisionLevel1" targetRef="adjustLoanApprovalRequest">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${loanApprovedLevel1 == 'false'}]]></conditionExpression>
+    </sequenceFlow>
+    <exclusiveGateway id="resendDecision" name="여신승인 재요청?"></exclusiveGateway>
+    <sequenceFlow id="flow15" sourceRef="adjustLoanApprovalRequest" targetRef="resendDecision"></sequenceFlow>
+    <sequenceFlow id="flow16" sourceRef="resendDecision" targetRef="handleLoanApprovalRequestL1">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${resendRequest == 'true'}]]></conditionExpression>
+    </sequenceFlow>
+    <endEvent id="endevent3" name="End"></endEvent>
+    <sequenceFlow id="flow17" sourceRef="resendDecision" targetRef="endevent3">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${resendRequest == 'false'}]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="flow18" sourceRef="requestApprovedDecisionLevel2" targetRef="adjustLoanApprovalRequest">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${loanApprovedLevel2 == 'false'}]]></conditionExpression>
+    </sequenceFlow>
+  </process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_loanApproval">
+    <bpmndi:BPMNPlane bpmnElement="loanApproval" id="BPMNPlane_loanApproval">
+      <bpmndi:BPMNShape bpmnElement="loanApprovalRequest" id="BPMNShape_loanApprovalRequest">
+        <omgdc:Bounds height="35.0" width="35.0" x="20.0" y="316.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="handleLoanApprovalRequestL1" id="BPMNShape_handleLoanApprovalRequestL1">
+        <omgdc:Bounds height="75.0" width="105.0" x="100.0" y="296.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="requestApprovedDecisionLevel2" id="BPMNShape_requestApprovedDecisionLevel2">
+        <omgdc:Bounds height="40.0" width="40.0" x="493.0" y="313.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="endevent1" id="BPMNShape_endevent1">
+        <omgdc:Bounds height="35.0" width="35.0" x="736.0" y="316.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="scripttask1" id="BPMNShape_scripttask1">
+        <omgdc:Bounds height="55.0" width="105.0" x="579.0" y="306.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="handleLoanApprovalRequestL2" id="BPMNShape_handleLoanApprovalRequestL2">
+        <omgdc:Bounds height="75.0" width="105.0" x="344.0" y="296.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="requestApprovedDecisionLevel1" id="BPMNShape_requestApprovedDecisionLevel1">
+        <omgdc:Bounds height="40.0" width="40.0" x="250.0" y="314.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="adjustLoanApprovalRequest" id="BPMNShape_adjustLoanApprovalRequest">
+        <omgdc:Bounds height="55.0" width="105.0" x="250.0" y="130.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="resendDecision" id="BPMNShape_resendDecision">
+        <omgdc:Bounds height="40.0" width="40.0" x="390.0" y="137.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="endevent3" id="BPMNShape_endevent3">
+        <omgdc:Bounds height="35.0" width="35.0" x="485.0" y="140.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge bpmnElement="flow5" id="BPMNEdge_flow5">
+        <omgdi:waypoint x="533.0" y="333.0"></omgdi:waypoint>
+        <omgdi:waypoint x="579.0" y="333.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow7" id="BPMNEdge_flow7">
+        <omgdi:waypoint x="684.0" y="333.0"></omgdi:waypoint>
+        <omgdi:waypoint x="736.0" y="333.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow9" id="BPMNEdge_flow9">
+        <omgdi:waypoint x="55.0" y="333.0"></omgdi:waypoint>
+        <omgdi:waypoint x="100.0" y="333.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow11" id="BPMNEdge_flow11">
+        <omgdi:waypoint x="449.0" y="333.0"></omgdi:waypoint>
+        <omgdi:waypoint x="493.0" y="333.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow12" id="BPMNEdge_flow12">
+        <omgdi:waypoint x="205.0" y="333.0"></omgdi:waypoint>
+        <omgdi:waypoint x="250.0" y="334.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow13" id="BPMNEdge_flow13">
+        <omgdi:waypoint x="290.0" y="334.0"></omgdi:waypoint>
+        <omgdi:waypoint x="344.0" y="333.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow14" id="BPMNEdge_flow14">
+        <omgdi:waypoint x="270.0" y="314.0"></omgdi:waypoint>
+        <omgdi:waypoint x="270.0" y="255.0"></omgdi:waypoint>
+        <omgdi:waypoint x="302.0" y="255.0"></omgdi:waypoint>
+        <omgdi:waypoint x="302.0" y="185.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow15" id="BPMNEdge_flow15">
+        <omgdi:waypoint x="355.0" y="157.0"></omgdi:waypoint>
+        <omgdi:waypoint x="390.0" y="157.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow16" id="BPMNEdge_flow16">
+        <omgdi:waypoint x="410.0" y="137.0"></omgdi:waypoint>
+        <omgdi:waypoint x="410.0" y="106.0"></omgdi:waypoint>
+        <omgdi:waypoint x="281.0" y="106.0"></omgdi:waypoint>
+        <omgdi:waypoint x="152.0" y="106.0"></omgdi:waypoint>
+        <omgdi:waypoint x="152.0" y="296.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow17" id="BPMNEdge_flow17">
+        <omgdi:waypoint x="430.0" y="157.0"></omgdi:waypoint>
+        <omgdi:waypoint x="485.0" y="157.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow18" id="BPMNEdge_flow18">
+        <omgdi:waypoint x="513.0" y="313.0"></omgdi:waypoint>
+        <omgdi:waypoint x="513.0" y="259.0"></omgdi:waypoint>
+        <omgdi:waypoint x="302.0" y="259.0"></omgdi:waypoint>
+        <omgdi:waypoint x="302.0" y="185.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</definitions>
