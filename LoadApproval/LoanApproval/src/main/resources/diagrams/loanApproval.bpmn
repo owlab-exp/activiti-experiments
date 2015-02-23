@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:activiti="http://activiti.org/bpmn" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" typeLanguage="http://www.w3.org/2001/XMLSchema" expressionLanguage="http://www.w3.org/1999/XPath" targetNamespace="Loan Approval">
-  <process id="loanApproval" name="여신승인프로세스" isExecutable="true">
+  <process id="loanApproval" name="여신승인프로세스" isExecutable="true" isValid="true">
     <startEvent id="loanApprovalRequest" name="여신승인요청" activiti:initiator="aprvlDemandStaffId">
       <extensionElements>
         <activiti:formProperty id="aprvId" name="승인식별자" type="string"></activiti:formProperty>
