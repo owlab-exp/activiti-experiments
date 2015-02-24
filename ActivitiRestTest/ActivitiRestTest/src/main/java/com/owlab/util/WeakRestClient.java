@@ -190,7 +190,7 @@ public class WeakRestClient {
 			final Object o = mapper.treeToValue(jsonNode, Object.class);
 			final String contents = mapper.writeValueAsString(o);
 			System.out.println(contents);
-			this.httpEntityEnclosingRequestBase.setEntity(new StringEntity(contents));
+			this.httpEntityEnclosingRequestBase.setEntity(new StringEntity(contents, "UTF-8"));
 		}
 		if(this.requestType == RequestType.NON_ENTITY_ENCLOSING)
 			System.out.println("Entity enclosing does not support in this type of http method: " + this.httpRequestBase.getMethod());
